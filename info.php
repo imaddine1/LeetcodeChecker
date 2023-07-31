@@ -47,43 +47,55 @@
 
         $get_day = date("l");
         $check = 0;
-        $site = 'https://leetcode-stats-api.herokuapp.com/';
+        $site = 'https://faisal-leetcode-api.cyclic.app/';
         $len = count($users_array);
+
+        if ($date_file != $get_day)
+        {
+            $check = 1;
+            $dec_file["date"] = $get_day; 
+        }
 
         for ($i = 0; $i < $len; $i++)
         {
-            if ($date_file != $get_day)
+            if ($check == 1)
             {
-                
-                $check = 1;
                 $concatenate = $site.$users_array[$i];
                 $api = file_get_contents($concatenate);
-                $dec_api = json_decode($api);
-                $dec_file[$users_array[$i]["date"]] = $get_day; 
-            }
-            if (check == 1)
-            {
-                if(($dec_api["easySolved"] >=  $dec_file["easy"] + 2) || 
-                ($dec_api["mediumSolved"] >=  $dec_file["mid"] + 1) ||
-                ($dec_api["hardSolved"] >=  $dec_file["hardSolved"] + 1))
+                if ($api == false)
                 {
-                    dec_file[$i]["status"] = $good_nwita;
+                    echo "The api is down. Just wait few minutes" . "<br>";
+                    break ;
+                }
+                
+                $dec_api = json_decode($api, true);
+                                
+                if(($dec_api["easySolved"] >=  $dec_file[$users_array[$i]]["easy"] + 2) || 
+                ($dec_api["mediumSolved"] >=  $dec_file[$users_array[$i]]["mid"] + 1) ||
+                ($dec_api["hardSolved"] >=  $dec_file[$users_array[$i]]["hard"] + 1))
+                {
+                    $dec_file[$users_array[$i]]["easy"] = $dec_api["easySolved"];
+                    $dec_file[$users_array[$i]]["mid"] = $dec_api["mediumSolved"];
+                    $dec_file[$users_array[$i]]["hard"] = $dec_api["hardSolved"];
+                    $dec_file[$users_array[$i]]["status"] = $good_nwita;
                 }
                 else
-                    dec_file[$i]["status"] = $bad_nwita;
+                    $dec_file[$users_array[$i]]["status"] = $bad_nwita;
             }
+            
+            echo "<tr>";
+                 echo "<td> $users_array[$i] </td>";
+                 echo "<td>";
+                 echo $dec_file[$users_array[$i]]["status"];
+                 echo "</td>";
+            echo "</tr>";
 
+        }
+        $encode_file = json_encode($dec_file);
+        file_put_contents('data.json', $encode_file);
         ?>
         <!-- this is my end test of php -->
-        <tr>
-            <td><?php echo $users_array[$i]?></td>
-            <td><?php echo $users_array[$i]["status"]?></td>
-        </tr>
         <!-- i need to update data.json file after loop end -->
-        <?php } 
-             $encode_file = json_encode($dec_file);
-             file_put_contents('data.json', $encode_file);
-        ?>
         <!-- end of php -->
         
     </table>
